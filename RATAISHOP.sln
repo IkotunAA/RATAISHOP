@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RATAISHOP", "RATAISHOP.csproj", "{DB9D043B-FB9B-4D51-A459-A8EF0791D701}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DB9D043B-FB9B-4D51-A459-A8EF0791D701}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB9D043B-FB9B-4D51-A459-A8EF0791D701}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB9D043B-FB9B-4D51-A459-A8EF0791D701}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB9D043B-FB9B-4D51-A459-A8EF0791D701}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {48C26ED6-7FE4-47E3-914D-7C1DCE81DC4F}
+	EndGlobalSection
+EndGlobal

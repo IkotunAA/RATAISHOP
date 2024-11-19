@@ -1,0 +1,6 @@
+@RATAISHOP_HostAddress = http://localhost:5022
+
+GET {{RATAISHOP_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
