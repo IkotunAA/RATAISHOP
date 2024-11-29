@@ -11,10 +11,20 @@ using System.Security.Claims;
 using System.Text;
 using static RATAISHOP.Exceptions.UnAuthorizedException;
 using Microsoft.EntityFrameworkCore;
+using RATAISHOP.PaymentServices.Implementations;
+using RATAISHOP.PaymentServices.Interfaces;
+using RATAISHOP.Repositories.Implementations;
+using RATAISHOP.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 
 builder.Services.AddControllers();
 builder.Services.AddAuthorization(options =>
@@ -71,6 +81,7 @@ builder.Services.AddSingleton<PayStackApi>(provider =>
     var paystackSettings = provider.GetRequiredService<IOptions<PaystackSettings>>().Value;
     return new PayStackApi(paystackSettings.SecretKey);
 });
+builder.Services.AddHttpClient<IPaystackPaymentService, PaystackPaymentService>();
 
 
 builder.Services.AddAuthentication(options =>

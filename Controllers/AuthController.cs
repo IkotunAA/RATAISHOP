@@ -1,46 +1,65 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-//using Microsoft.IdentityModel.Protocols.WSIdentity;
-using RATAISHOP.Authentication;
+﻿using Microsoft.AspNetCore.Mvc;
 using RATAISHOP.Models;
 using RATAISHOP.Services.Interfaces;
-using TokenService = RATAISHOP.Authentication.TokenService;
+using System.Threading.Tasks;
 
 namespace RATAISHOP.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    [ApiController]
+    public class AuthenticationController : ControllerBase
     {
         private readonly IUserService _userService;
 
-        public AuthController(IUserService userService)
+        public AuthenticationController(IUserService userService)
         {
             _userService = userService;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(UserDto registerDto)
+        public async Task<IActionResult> Register([FromBody] UserDto userDto)
         {
-            var response = await _userService.RegisterUser(registerDto);
-            if (!response.Status == false)
+            if (string.IsNullOrEmpty(userDto.UserName) ||
+                string.IsNullOrEmpty(userDto.Password) ||
+                string.IsNullOrEmpty(userDto.Email))
             {
-                return BadRequest(response.Message);
+                return BadRequest(new BaseResponse<string>
+                {
+                    Status = false,
+                    Message = "Username, password, and email are required."
+                });
             }
-            return Ok(response.Message);
+
+            var response = await _userService.RegisterUser(userDto);
+
+            if (!response.Status)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(UserDto loginDto)
+        public async Task<IActionResult> Login([FromBody] UserDto userDto)
         {
-            var response = await _userService.LoginUser(loginDto);
-            if (!response.Status == false)
+            if (string.IsNullOrEmpty(userDto.UserName) || string.IsNullOrEmpty(userDto.Password))
             {
-                return Unauthorized(response.Message);
+                return BadRequest(new BaseResponse<string>
+                {
+                    Status = false,
+                    Message = "Username and password are required."
+                });
             }
-            return Ok(response.Data);
+
+            var response = await _userService.LoginUser(userDto);
+
+            if (!response.Status)
+            {
+                return Unauthorized(response);
+            }
+
+            return Ok(response);
         }
     }
-
 }
