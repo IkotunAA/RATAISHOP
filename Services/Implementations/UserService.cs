@@ -37,7 +37,7 @@ namespace RATAISHOP.Services.Implementations
         public async Task<UserResponse> RegisterUser(UserDto userDto)
         {
             var newUser = await _userRepository.GetByIdAsync(userDto.Id);
-            if (newUser.UserName != null)
+            if (newUser?.UserName != null)
             {
                 return new UserResponse
                 {
@@ -45,7 +45,7 @@ namespace RATAISHOP.Services.Implementations
                     Message = "Username already exists"
                 };
             }
-            if (newUser.Email != null)
+            if (newUser?.Email != null)
             {
                 return new UserResponse//(false, "User already exists");
                 {
@@ -86,54 +86,29 @@ namespace RATAISHOP.Services.Implementations
             return new BaseResponse<string> { Status = true, Message = "User deleted successfully." };
         }
 
-        public async Task<LoginResponseModel> LoginUser(UserDto userDto)
+        public async Task<LoginResponseModel> LoginUserByIdentifier(string identifier, string password)
         {
-            var user = await _userRepository.GetByIdAsync(userDto.Id);
-            var token = _tokenService.GenerateToken(user.UserName);
-            if (user == null)
-            {
-                bool isPasswordValid = BCrypt.Net.BCrypt.Verify(userDto.Password, user.PasswordHash);
-                if (isPasswordValid)
-                {   
-                    return new LoginResponseModel
-                    {
-                        
-                        Status = true,
-                        Message = "Login successfully.",
-                        Data = new UserDto()
-                        {
-                            Id = userDto.Id,
-                            UserName = userDto.UserName,
-                            Email = userDto.Email,
-                            Address = userDto.Address,
-                            Password = userDto.Password,
-                            PhoneNumber = userDto.PhoneNumber,
-                            Role = userDto.Role,
-                            WalletBalance = userDto.WalletBalance,
-                        },
-                        Token = token,
-                    };
-                }
-                else
-                {
-                    return new LoginResponseModel
-                    {
-                        Status = false,
-                        Message = "Invalid login credentials"
-                    };
-                }
-            }
-            else
+            var user = await _userRepository.GetUserByUsernameOrEmailAsync(identifier);
+
+            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
                 return new LoginResponseModel
                 {
                     Status = false,
-                    Message = "Invalid login credentials"
+                    Message = "Invalid username/email or password."
                 };
             }
-        }
 
-      
+            var token = _tokenService.GenerateToken(user.UserName);
+
+            return new LoginResponseModel
+            {
+                Status = true,
+                Message = "Login successful.",
+                Token = token,
+                //Data = _mapper.Map<UserDto>(user)
+            };
+        }
     }
 
 }

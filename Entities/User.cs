@@ -8,7 +8,7 @@ namespace RATAISHOP.Entities
         public string UserName { get; set; } = default!;
         public string Email { get; set; } = default!;
         public string PasswordHash { get; set; } = null!;
-        public string Salt { get; set; } = null!;
+        //public string Salt { get; set; } = null!;
         public string Address { get; set; } = default!;
         public string PhoneNumber { get; set; } = default!;
         public decimal WalletBalance { get; set; }

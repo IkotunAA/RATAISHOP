@@ -129,10 +129,6 @@ namespace RATAISHOP.PaymentServices.Implementations
             _configuration = configuration;
             _httpClient = httpClient;
         }
-
-        /// <summary>
-        /// Initializes a payment with Paystack.
-        /// </summary>
         public async Task<PaystackPaymentResponse> InitializePaymentAsync(PaystackPaymentModel paymentRequest)
         {
             var transactionRequest = new TransactionInitializeRequest

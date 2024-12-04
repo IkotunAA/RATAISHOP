@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RATAISHOP.Enum;
 using RATAISHOP.Models;
 using RATAISHOP.Services.Interfaces;
 using System.Threading.Tasks;
@@ -17,18 +18,32 @@ namespace RATAISHOP.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UserDto userDto)
+        public async Task<IActionResult> Register([FromBody] RegisterRequestModel registerRequest)
         {
-            if (string.IsNullOrEmpty(userDto.UserName) ||
-                string.IsNullOrEmpty(userDto.Password) ||
-                string.IsNullOrEmpty(userDto.Email))
+            if (string.IsNullOrEmpty(registerRequest.UserName) ||
+                string.IsNullOrEmpty(registerRequest.Email) ||
+                string.IsNullOrEmpty(registerRequest.Password) ||
+                string.IsNullOrEmpty(registerRequest.Address) ||
+                string.IsNullOrEmpty(registerRequest.PhoneNumber))
             {
                 return BadRequest(new BaseResponse<string>
                 {
                     Status = false,
-                    Message = "Username, password, and email are required."
+                    Message = "All fields are required."
                 });
             }
+
+            // Automatically set WalletBalance to 0 for sellers
+            var userDto = new UserDto
+            {
+                UserName = registerRequest.UserName,
+                Email = registerRequest.Email,
+                Password = registerRequest.Password,
+                Address = registerRequest.Address,
+                PhoneNumber = registerRequest.PhoneNumber,
+                Role = registerRequest.Role,
+                WalletBalance = registerRequest.Role == UserRole.Seller ? 0 : (decimal?)null
+            };
 
             var response = await _userService.RegisterUser(userDto);
 
@@ -41,18 +56,18 @@ namespace RATAISHOP.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserDto userDto)
+        public async Task<IActionResult> Login([FromBody] LoginRequestModel loginRequest)
         {
-            if (string.IsNullOrEmpty(userDto.UserName) || string.IsNullOrEmpty(userDto.Password))
+            if (string.IsNullOrEmpty(loginRequest.Identifier) || string.IsNullOrEmpty(loginRequest.Password))
             {
                 return BadRequest(new BaseResponse<string>
                 {
                     Status = false,
-                    Message = "Username and password are required."
+                    Message = "Username or email and password are required."
                 });
             }
 
-            var response = await _userService.LoginUser(userDto);
+            var response = await _userService.LoginUserByIdentifier(loginRequest.Identifier, loginRequest.Password);
 
             if (!response.Status)
             {

@@ -7,6 +7,13 @@
     <UserSecretsId>aspnet-RATAISHOP-35ee8b25-aacb-475b-aa11-39e792db4924</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Services\Controllers\**" />
+    <Content Remove="Services\Controllers\**" />
+    <EmbeddedResource Remove="Services\Controllers\**" />
+    <None Remove="Services\Controllers\**" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="AutoMapper" Version="13.0.1" />
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />

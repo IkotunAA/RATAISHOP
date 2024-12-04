@@ -11,8 +11,8 @@ using RATAISHOP.Context;
 namespace RATAISHOP.Migrations
 {
     [DbContext(typeof(RataiDbContext))]
-    [Migration("20240826175250_new")]
-    partial class @new
+    [Migration("20241202162710_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -213,10 +213,6 @@ namespace RATAISHOP.Migrations
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
-
-                    b.Property<string>("Salt")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<string>("UserName")
                         .IsRequired()

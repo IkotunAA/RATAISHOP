@@ -51,7 +51,7 @@ namespace RATAISHOP.Services.Implementations
 
             if (order == null || order.PaymentStatus != PaymentStatus.PendingVerification)
             {
-                return new BaseResponse<string>{ Status = false, Message = "Invalid order or order not in pending verification state.", Data = null };
+                return new BaseResponse<string> { Status = false, Message = "Invalid order or order not in pending verification state.", Data = null };
             }
 
             // Step 3: Verify the bank transfer using a transaction reference
@@ -72,22 +72,22 @@ namespace RATAISHOP.Services.Implementations
                     await _walletRepository.UpdateWalletAsync(wallet);
                 }
 
-                return new BaseResponse<string>{ Status = true, Message = "Bank transfer verified successfully.", Data = null };
+                return new BaseResponse<string> { Status = true, Message = "Bank transfer verified successfully.", Data = null };
             }
             else
             {
-                return new BaseResponse<string>{ Status = false, Message = "Bank transfer verification failed. Please try again.", Data = null };
+                return new BaseResponse<string> { Status = false, Message = "Bank transfer verification failed. Please try again.", Data = null };
             }
         }
 
         public async Task<BaseResponse<string>> ProcessPaystackPayment(Order order)
-    {
-        var paymentResponse = await _paystackOptions.InitiatePaymentAsync(order);
-
-        if (paymentResponse.Status == true)
         {
-            order.PaymentStatus = PaymentStatus.Paid; // Set status to Paid
-            await _orderRepository.UpdateOrderAsync(order);
+            var paymentResponse = await _paystackOptions.InitiatePaymentAsync(order);
+
+            if (paymentResponse.Status == true)
+            {
+                order.PaymentStatus = PaymentStatus.Paid; // Set status to Paid
+                await _orderRepository.UpdateOrderAsync(order);
 
                 // Update the seller's wallet
                 foreach (var orderItem in order.OrderItems)
@@ -104,10 +104,10 @@ namespace RATAISHOP.Services.Implementations
                     Message = "Payment successful via Paystack.",
                     Data = paymentResponse.Data
                 };
-        }
+            }
 
-        order.PaymentStatus = PaymentStatus.Failed; // Set status to Failed if payment didn't succeed
-        await _orderRepository.UpdateOrderAsync(order);
+            order.PaymentStatus = PaymentStatus.Failed; // Set status to Failed if payment didn't succeed
+            await _orderRepository.UpdateOrderAsync(order);
 
             return new BaseResponse<string>
             {
@@ -115,46 +115,46 @@ namespace RATAISHOP.Services.Implementations
                 Message = "Paystack payment failed.",
                 Data = null
             };
-    }
-
-    public async Task<BaseResponse<bool>> TransferToBankAccountAsync(string accountNumber, string bankCode, decimal amount, string narration, string bankName)
-    {
-        var url = "https://api.paystack.co/transfer";
-
-        var payload = new
-        {
-            source = "balance",
-            amount = (int)(amount * 100), // Paystack requires amount in kobo
-            currency = "NGN",
-            recipient = new
-            {
-                type = "nuban",
-                name = "Seller Name", // Replace with actual seller name
-                account_number = accountNumber,
-                bank_code = bankCode,
-                Narration = narration,
-                BankName = bankName
-            }
-        };
-
-        var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync(url, content);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            return new BaseResponse<bool>//(false, "Transfer failed.");
-            {
-                Status = false,
-                Message = "Transfer failed."
-            };
         }
 
-        return new BaseResponse<bool>
+        public async Task<BaseResponse<bool>> TransferToBankAccountAsync(string accountNumber, string bankCode, decimal amount, string narration, string bankName)
         {
-            Status = true,
-            Message = "Transfer successful.",
-            Data = true
-        };
+            var url = "https://api.paystack.co/transfer";
+
+            var payload = new
+            {
+                source = "balance",
+                amount = (int)(amount * 100), // Paystack requires amount in kobo
+                currency = "NGN",
+                recipient = new
+                {
+                    type = "nuban",
+                    name = "Seller Name", // Replace with actual seller name
+                    account_number = accountNumber,
+                    bank_code = bankCode,
+                    Narration = narration,
+                    BankName = bankName
+                }
+            };
+
+            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync(url, content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new BaseResponse<bool>//(false, "Transfer failed.");
+                {
+                    Status = false,
+                    Message = "Transfer failed."
+                };
+            }
+
+            return new BaseResponse<bool>
+            {
+                Status = true,
+                Message = "Transfer successful.",
+                Data = true
+            };
+        }
     }
-}
 }

@@ -15,15 +15,27 @@ using RATAISHOP.PaymentServices.Implementations;
 using RATAISHOP.PaymentServices.Interfaces;
 using RATAISHOP.Repositories.Implementations;
 using RATAISHOP.Repositories.Interfaces;
+using RATAISHOP.Services.Interfaces;
+using RATAISHOP.Services.Implementations;
+using RATAISHOP.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+//builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+//builder.Services.AddScoped<IWalletService, WalletService>();
+builder.Services.AddScoped<IPaystackPaymentService, PaystackPaymentService>();
+//builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<TokenService>();
 
 
 builder.Services.AddControllers();
@@ -136,6 +148,7 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddDbContext<RataiDbContext>(options =>
 {
+    //options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
     options.UseMySQL(builder.Configuration.GetConnectionString("Default"));
 });
 var app = builder.Build();

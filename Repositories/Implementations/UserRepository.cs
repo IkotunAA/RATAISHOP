@@ -1,4 +1,5 @@
-﻿using RATAISHOP.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using RATAISHOP.Context;
 using RATAISHOP.Entities;
 using RATAISHOP.Repositories.Interfaces;
 
@@ -16,6 +17,11 @@ namespace RATAISHOP.Repositories.Implementations
         public async Task<User?> GetByIdAsync(int id)
         {
             return await _context.Users.FindAsync(id);
+        }
+        public async Task<User> GetUserByUsernameOrEmailAsync(string identifier)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.UserName == identifier || u.Email == identifier);
         }
 
         public async Task AddAsync(User user)
