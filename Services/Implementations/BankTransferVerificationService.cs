@@ -1,6 +1,8 @@
-﻿namespace RATAISHOP.Services.Implementations
+﻿using RATAISHOP.Services.Interfaces;
+
+namespace RATAISHOP.Services.Implementations
 {
-    public class BankTransferVerificationService
+    public class BankTransferVerificationService : IBankTransferVerificationService
     {
         public async Task<bool> VerifyTransaction(string transactionReference)
         {

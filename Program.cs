@@ -18,12 +18,14 @@ using RATAISHOP.Repositories.Interfaces;
 using RATAISHOP.Services.Interfaces;
 using RATAISHOP.Services.Implementations;
 using RATAISHOP.Authentication;
+using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-//builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
@@ -31,9 +33,10 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
-//builder.Services.AddScoped<IWalletService, WalletService>();
+builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IPaystackPaymentService, PaystackPaymentService>();
-//builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IBankTransferVerificationService, BankTransferVerificationService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<TokenService>();
 

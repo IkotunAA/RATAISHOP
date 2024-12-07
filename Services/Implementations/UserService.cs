@@ -18,9 +18,9 @@ namespace RATAISHOP.Services.Implementations
         public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork, TokenService tokenService, IMapper mapper)
         {
             _userRepository = userRepository;
-            _mapper = mapper;
-            _tokenService = tokenService;
             _unitOfWork = unitOfWork;
+            _tokenService = tokenService;
+            _mapper = mapper;
         }
 
         public async Task<UserResponse> GetUserByIdAsync(int id)
@@ -31,44 +31,39 @@ namespace RATAISHOP.Services.Implementations
                 return new UserResponse { Status = false, Message = "User not found." };
             }
 
-            return new UserResponse { Status = true, Data = _mapper.Map<UserDto>(user) };
+            return new UserResponse
+            {
+                Status = true,
+                Data = _mapper.Map<UserDto>(user)
+            };
         }
 
         public async Task<UserResponse> RegisterUser(UserDto userDto)
         {
-            var newUser = await _userRepository.GetByIdAsync(userDto.Id);
-            if (newUser?.UserName != null)
+            // Check if the username or email already exists
+            var existingUser = await _userRepository.GetUserByUsernameOrEmailAsync(userDto.Email);
+            if (existingUser != null)
             {
                 return new UserResponse
                 {
                     Status = false,
-                    Message = "Username already exists"
+                    Message = "Username or email already exists."
                 };
             }
-            if (newUser?.Email != null)
-            {
-                return new UserResponse//(false, "User already exists");
-                {
-                    Status = false,
-                    Message = "User already exists"
-                };
-            }
+
+            // Hash the password
             string salt = BCrypt.Net.BCrypt.GenerateSalt();
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(userDto.Password, salt);
-            //var user = _mapper.Map<User>(userDto);
-            var user = new User()
-            {
-                Id = userDto.Id,
-                UserName = userDto.UserName,
-                Email = userDto.Email,
-                PasswordHash = hashedPassword,
-                Address = userDto.Address,
-                Role = userDto.Role,
-                PhoneNumber = userDto.PhoneNumber,
-                WalletBalance = 0,
-            };
+
+            // Map DTO to entity and set defaults
+            var user = _mapper.Map<User>(userDto);
+            user.PasswordHash = hashedPassword;
+            user.WalletBalance = 0; // Default wallet balance for new users
+
+            // Add and save the new user
             await _userRepository.AddAsync(user);
             _unitOfWork.SaveChanges();
+
             return new UserResponse { Status = true, Message = "User created successfully." };
         }
 
@@ -77,12 +72,15 @@ namespace RATAISHOP.Services.Implementations
             var user = _mapper.Map<User>(userDto);
             await _userRepository.UpdateAsync(user);
             _unitOfWork.SaveChanges();
+
             return new UserResponse { Status = true, Message = "User updated successfully." };
         }
 
         public async Task<BaseResponse<string>> DeleteUserAsync(int id)
         {
             await _userRepository.DeleteAsync(id);
+            _unitOfWork.SaveChanges();
+
             return new BaseResponse<string> { Status = true, Message = "User deleted successfully." };
         }
 
@@ -106,9 +104,8 @@ namespace RATAISHOP.Services.Implementations
                 Status = true,
                 Message = "Login successful.",
                 Token = token,
-                //Data = _mapper.Map<UserDto>(user)
+                Data = _mapper.Map<UserDto>(user)
             };
         }
     }
-
 }
