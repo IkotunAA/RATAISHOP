@@ -22,8 +22,11 @@ using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+
+// Register dependencies
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
@@ -40,14 +43,14 @@ builder.Services.AddScoped<IBankTransferVerificationService, BankTransferVerific
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<TokenService>();
 
-
+// Add controllers and authorization
 builder.Services.AddControllers();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -73,7 +76,7 @@ builder.Services.AddSwaggerGen(c =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = JwtBearerDefaults.AuthenticationScheme //"Bearer"
+                    Id = JwtBearerDefaults.AuthenticationScheme
                 },
                 Scheme = JwtBearerDefaults.AuthenticationScheme,
                 Name = "Bearer",
@@ -84,13 +87,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
-
+// Configure Paystack
 builder.Services.Configure<PaystackSettings>(builder.Configuration.GetSection("Paystack"));
-
-
-
-
 builder.Services.AddSingleton<PayStackApi>(provider =>
 {
     var paystackSettings = provider.GetRequiredService<IOptions<PaystackSettings>>().Value;
@@ -98,7 +96,7 @@ builder.Services.AddSingleton<PayStackApi>(provider =>
 });
 builder.Services.AddHttpClient<IPaystackPaymentService, PaystackPaymentService>();
 
-
+// Configure Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -117,7 +115,6 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = "Adetunji",
         ValidateLifetime = true,
         ValidateAudience = false,
-        // ValidAudiences = "",
         RoleClaimType = ClaimTypes.Role,
         ClockSkew = TimeSpan.Zero
     };
@@ -141,7 +138,6 @@ builder.Services.AddAuthentication(options =>
             if (!string.IsNullOrEmpty(accessToken) &&
                 context.HttpContext.Request.Path.StartsWithSegments("/notifications"))
             {
-                // Read the token out of the query string
                 context.Token = accessToken;
             }
 
@@ -149,15 +145,24 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
+
+// Configure database context
 builder.Services.AddDbContext<RataiDbContext>(options =>
 {
-    //options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
     options.UseMySQL(builder.Configuration.GetConnectionString("Default"));
 });
+
+// Build the app
 var app = builder.Build();
 
+// Use Kestrel to listen on a dynamic port for deployment
+builder.WebHost.UseKestrel()
+               .UseUrls("http://0.0.0.0:" + Environment.GetEnvironmentVariable("PORT"));
 
+// Middleware for error handling
 app.UseMiddleware<ExceptionMiddleware>();
+
+// Swagger for development
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -168,5 +173,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
 
 app.Run();
